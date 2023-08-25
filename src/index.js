@@ -1,5 +1,5 @@
 import express from "express";
-import members from "./data/members.json" assert { type: "json" };
+import members from "../data/members.json" assert { type: "json" };
 
 const app = express();
 const PORT = 3000;
