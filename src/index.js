@@ -36,10 +36,18 @@ app.get("/member/:id", (req, res) => {
 
 // GET member's friends by member ID
 app.get("/member/:id/friends", (req, res) => {
-    const memberId = Number(req.params.id);
-    const filteredFriendships = friendships.filter((friendship) => friendship.member1_id === memberId);
+    const requestedId = Number(req.params.id);
+
+    // find all friendships that the requested member is a part of
+    const filteredFriendships = friendships.filter((friendship) =>
+        friendship.member1_id === requestedId || friendship.member2_id === requestedId
+    );
+
+    // for every friendship, return the *other* member's profile, resulting in an array of friends' profiles
     const friends = filteredFriendships.map((friendship) =>
-        members.filter((member) => member.id === friendship.member2_id)
+        members.filter((member) =>
+            member.id === (requestedId === friendship.member1_id ? friendship.member2_id : friendship.member1_id)
+        )
     );
 
     res.send(friends);
@@ -83,11 +91,33 @@ app.post("/register", (req, res) => {
 
     const updatedMembers = members.concat(newMember);
 
-    if (updateData("data/members.json", updatedMembers)) {
-        res.sendStatus(201);
-    } else {
-        res.sendStatus(400);
+    updateData("data/members.json", updatedMembers) ? res.sendStatus(201) : res.sendStatus(400);
+});
+
+// POST new friendship
+app.post("/member/:id1/befriend/:id2", (req, res) => {
+    const id1 = Number(req.params.id1);
+    const id2 = Number(req.params.id2);
+    const member1Id = Math.min(id1, id2);
+    const member2Id = Math.max(id1, id2);
+
+    // check if already exists
+    const friendship = friendships.filter((friendship) =>
+        friendship.member1_id === member1Id && friendship.member2_id === member2Id
+    );
+
+    if (friendship.length > 0) {
+        return res.sendStatus(400);
     }
+
+    const newFriendship = {
+        member1_id: member1Id,
+        member2_id: member2Id
+    };
+
+    const updatedFriendships = friendships.concat(newFriendship);
+
+    updateData("data/friendships.json", updatedFriendships) ? res.sendStatus(202) : res.sendStatus(400);
 });
 
 // DELETE member
@@ -95,11 +125,7 @@ app.delete("/member/:id/delete", (req, res) => {
     const memberId = Number(req.params.id);
     const updatedMembers = members.filter((member) => member.id !== memberId);
 
-    if (updateData("data/members.json", updatedMembers)) {
-        res.sendStatus(204);
-    } else {
-        res.sendStatus(400);
-    }
+    updateData("data/members.json", updatedMembers) ? res.sendStatus(204) : res.sendStatus(400);
 });
 
 app.listen(PORT, () => {
