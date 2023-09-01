@@ -6,6 +6,19 @@ import friendships from "../data/friendships.json" assert { type: "json" };
 const app = express();
 const PORT = 3000;
 
+// re-writes new data to the specified json file
+function updateData(dataPath, newData) {
+    const newDataJson = JSON.stringify(newData);
+
+    try {
+        fs.writeFileSync(dataPath, newDataJson);
+        return true;
+    } catch (e) {
+        console.log(e);
+        return false;
+    }
+}
+
 // Receive requests in JSON format
 app.use(express.json());
 
@@ -69,13 +82,22 @@ app.post("/register", (req, res) => {
     };
 
     const updatedMembers = members.concat(newMember);
-    const updatedMembersJson = JSON.stringify(updatedMembers);
 
-    try {
-        fs.writeFileSync("data/members.json", updatedMembersJson);
+    if (updateData("data/members.json", updatedMembers)) {
         res.sendStatus(201);
-    } catch (e) {
-        console.log(e);
+    } else {
+        res.sendStatus(400);
+    }
+});
+
+// DELETE member
+app.delete("/member/:id/delete", (req, res) => {
+    const memberId = Number(req.params.id);
+    const updatedMembers = members.filter((member) => member.id !== memberId);
+
+    if (updateData("data/members.json", updatedMembers)) {
+        res.sendStatus(204);
+    } else {
         res.sendStatus(400);
     }
 });
