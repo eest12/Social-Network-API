@@ -2,6 +2,17 @@
 
 An Express API.
 
+## HTTP Routes
+
+| Method | Path | Description |
+| --- | --- | --- |
+| GET | /members | Get all members |
+| GET | /member/:id | Get member by ID |
+| GET | /member/:id/friends | Get member's friends |
+| GET | /member/:id1/friends/:id2 | Get member's friend (or empty set if the two members are not friends) |
+| POST | /register | Create new member |
+| DELETE | /member/:id/delete | Delete member |
+
 ## Data
 
 The `data` directory contains two files: `members.json` and `friendships.json`. I will explain how to generate them, but the existing files can be used as they are.
