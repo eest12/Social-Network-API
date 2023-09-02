@@ -27,11 +27,26 @@ app.get("/members", (req, res) => {
     res.json(members);
 });
 
+app.route("/member/:id")
+
 // GET member by ID
-app.get("/member/:id", (req, res) => {
+.get((req, res) => {
     const memberId = Number(req.params.id);
     const member = members.filter((member) => member.id === memberId);
     res.send(member);
+})
+
+// DELETE member
+.delete((req, res) => {
+    const memberId = Number(req.params.id);
+    const updatedMembers = members.filter((member) => member.id !== memberId);
+
+    // check if nothing was removed
+    if (updatedMembers.length == members.length) {
+        return res.status(400).send({ message: "Invalid member ID." });
+    }
+
+    updateData("data/members.json", updatedMembers) ? res.sendStatus(204) : res.sendStatus(400);
 });
 
 // GET member's friends by member ID
@@ -53,8 +68,10 @@ app.get("/member/:id/friends", (req, res) => {
     res.send(friends);
 });
 
+app.route("/member/:id1/friend/:id2")
+
 // GET a member's friend (returns empty set if the two members are not friends)
-app.get("/member/:id1/friends/:id2", (req, res) => {
+.get((req, res) => {
     const memberId = Number(req.params.id1);
     const friendId = Number(req.params.id2);
     const friendship = friendships.filter((friendship) =>
@@ -64,6 +81,64 @@ app.get("/member/:id1/friends/:id2", (req, res) => {
     const friend = friendship.length > 0 ? members.filter((member) => member.id === friendId) : [];
 
     res.send(friend);
+})
+
+// POST new friendship
+.post((req, res) => {
+    const id1 = Number(req.params.id1);
+    const id2 = Number(req.params.id2);
+    const member1Id = Math.min(id1, id2);
+    const member2Id = Math.max(id1, id2);
+
+    // check if the two member IDs are the same
+    if (member1Id === member2Id) {
+        return res.status(400).send({ message: "Member IDs must be different." });
+    }
+
+    // make sure both member IDs exist
+    const membersBecomingFriends = members.filter((member) =>
+        member.id === member1Id || member.id === member2Id
+    );
+
+    if (membersBecomingFriends.length != 2) {
+        return res.status(400).send({ message: "Invalid member ID." });
+    }
+
+    // check if friendship already exists
+    for (let i = 0; i < friendships.length; i++) {
+        if (friendships[i].member1_id === member1Id && friendships[i].member2_id === member2Id) {
+            return res.status(400).send({ message: "Friendship already exists." });
+        }
+    }
+
+    const newFriendship = {
+        member1_id: member1Id,
+        member2_id: member2Id
+    };
+
+    const updatedFriendships = friendships.concat(newFriendship);
+
+    updateData("data/friendships.json", updatedFriendships) ? res.sendStatus(202) : res.sendStatus(400);
+})
+
+// DELETE friendship
+.delete((req, res) => {
+    const id1 = Number(req.params.id1);
+    const id2 = Number(req.params.id2);
+    const member1Id = Math.min(id1, id2);
+    const member2Id = Math.max(id1, id2);
+
+    // keep all friendships except for the one with member1Id and member2Id
+    const updatedFriendships = friendships.filter((friendship) =>
+        !(friendship.member1_id === member1Id && friendship.member2_id === member2Id)
+    );
+
+    // check if nothing was removed
+    if (updatedFriendships.length == friendships.length) {
+        return res.status(400).send({ message: "Friendship not found." });
+    }
+
+    updateData("data/friendships.json", updatedFriendships) ? res.sendStatus(204) : res.sendStatus(400);
 });
 
 // POST new member
@@ -74,7 +149,14 @@ app.post("/register", (req, res) => {
     // validate request body fields
     for (let i = 0; i < requiredFields.length; i++) {
         if (req.body[requiredFields[i]] == null) {
-            return res.sendStatus(400);
+            return res.status(400).send({ message: `Request body missing '${requiredFields[i]}' field.` });
+        }
+    }
+
+    // make sure email is unique
+    for (let i = 0; i < members.length; i++) {
+        if (members[i].email == req.body["email"]) {
+            return res.status(400).send({ message: "Email already exists." });
         }
     }
 
@@ -92,65 +174,6 @@ app.post("/register", (req, res) => {
     const updatedMembers = members.concat(newMember);
 
     updateData("data/members.json", updatedMembers) ? res.sendStatus(201) : res.sendStatus(400);
-});
-
-// POST new friendship
-app.post("/member/:id1/befriend/:id2", (req, res) => {
-    const id1 = Number(req.params.id1);
-    const id2 = Number(req.params.id2);
-    const member1Id = Math.min(id1, id2);
-    const member2Id = Math.max(id1, id2);
-
-    // check if already exists
-    const friendship = friendships.filter((friendship) =>
-        friendship.member1_id === member1Id && friendship.member2_id === member2Id
-    );
-
-    if (friendship.length > 0) {
-        return res.sendStatus(400);
-    }
-
-    const newFriendship = {
-        member1_id: member1Id,
-        member2_id: member2Id
-    };
-
-    const updatedFriendships = friendships.concat(newFriendship);
-
-    updateData("data/friendships.json", updatedFriendships) ? res.sendStatus(202) : res.sendStatus(400);
-});
-
-// DELETE member
-app.delete("/member/:id/delete", (req, res) => {
-    const memberId = Number(req.params.id);
-    const updatedMembers = members.filter((member) => member.id !== memberId);
-
-    // check if nothing was removed
-    if (updatedMembers.length == members.length) {
-        return res.sendStatus(400);
-    }
-
-    updateData("data/members.json", updatedMembers) ? res.sendStatus(204) : res.sendStatus(400);
-});
-
-// DELETE friendship
-app.delete("/member/:id1/unfriend/:id2", (req, res) => {
-    const id1 = Number(req.params.id1);
-    const id2 = Number(req.params.id2);
-    const member1Id = Math.min(id1, id2);
-    const member2Id = Math.max(id1, id2);
-
-    // keep all friendships except for the one with member1Id and member2Id
-    const updatedFriendships = friendships.filter((friendship) =>
-        !(friendship.member1_id === member1Id && friendship.member2_id === member2Id)
-    );
-
-    // check if nothing was removed
-    if (updatedFriendships.length == friendships.length) {
-        return res.sendStatus(400);
-    }
-
-    updateData("data/friendships.json", updatedFriendships) ? res.sendStatus(204) : res.sendStatus(400);
 });
 
 app.listen(PORT, () => {

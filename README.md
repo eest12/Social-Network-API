@@ -4,16 +4,50 @@ An Express API.
 
 ## HTTP Routes
 
-| Method | Path | Description |
-| --- | --- | --- |
-| GET | /members | Get all members |
-| GET | /member/:id | Get member by ID |
-| GET | /member/:id/friends | Get member's friends |
-| GET | /member/:id1/friends/:id2 | Get member's friend (or empty set if the two members are not friends) |
-| POST | /register | Create new member |
-| POST | /member/:id1/befriend/:id2 | Add member as friend |
-| DELETE | /member/:id/delete | Delete member |
-| DELETE | /member/:id1/unfriend/:id2 | Remove member as friend |
+<table>
+    <tr>
+        <th>Path</th>
+        <th>Method</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td>/members</td>
+        <td>GET</td>
+        <td>Get all members</td>
+    </tr>
+    <tr>
+        <td rowspan="2">/member/:id</td>
+        <td>GET</td>
+        <td>Get member</td>
+    </tr>
+    <tr>
+        <td>DELETE</td>
+        <td>Delete member</td>
+    </tr>
+    <tr>
+        <td>/member/:id/friends</td>
+        <td>GET</td>
+        <td>Get member's friends</td>
+    </tr>
+    <tr>
+        <td rowspan="3">/member/:id1/friend/:id2</td>
+        <td>GET</td>
+        <td>Get member's friend (or empty set if the two members are not friends)</td>
+    </tr>
+    <tr>
+        <td>POST</td>
+        <td>Add member as friend</td>
+    </tr>
+    <tr>
+        <td>DELETE</td>
+        <td>Remove member as friend</td>
+    </tr>
+    <tr>
+        <td>/register</td>
+        <td>POST</td>
+        <td>Create new member</td>
+    </tr>
+</table>
 
 ## Data
 
