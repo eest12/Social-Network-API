@@ -36,7 +36,7 @@ app.route("/member/:id")
     res.send(member);
 })
 
-// DELETE member
+// DELETE member and all friendships associated with it
 .delete((req, res) => {
     const memberId = Number(req.params.id);
     const updatedMembers = members.filter((member) => member.id !== memberId);
@@ -44,6 +44,16 @@ app.route("/member/:id")
     // check if nothing was removed
     if (updatedMembers.length == members.length) {
         return res.status(400).send({ message: "Invalid member ID." });
+    }
+
+    // remove all friendships involving the deleted member
+    const updatedFriendships = friendships.filter((friendship) =>
+        friendship.member1_id !== memberId && friendship.member2_id !== memberId
+    );
+
+    // send error status if any friendships were removed but the dataset was not successfully updated
+    if (updatedFriendships.length < friendships.length && !updateData("data/friendships.json", updatedFriendships)) {
+        return res.sendStatus(400);
     }
 
     updateData("data/members.json", updatedMembers) ? res.sendStatus(204) : res.sendStatus(400);

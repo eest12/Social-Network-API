@@ -22,7 +22,7 @@ An Express API.
     </tr>
     <tr>
         <td>DELETE</td>
-        <td>Delete member</td>
+        <td>Delete member and all friendships associated with it</td>
     </tr>
     <tr>
         <td>/member/:id/friends</td>
