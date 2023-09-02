@@ -125,7 +125,32 @@ app.delete("/member/:id/delete", (req, res) => {
     const memberId = Number(req.params.id);
     const updatedMembers = members.filter((member) => member.id !== memberId);
 
+    // check if nothing was removed
+    if (updatedMembers.length == members.length) {
+        return res.sendStatus(400);
+    }
+
     updateData("data/members.json", updatedMembers) ? res.sendStatus(204) : res.sendStatus(400);
+});
+
+// DELETE friendship
+app.delete("/member/:id1/unfriend/:id2", (req, res) => {
+    const id1 = Number(req.params.id1);
+    const id2 = Number(req.params.id2);
+    const member1Id = Math.min(id1, id2);
+    const member2Id = Math.max(id1, id2);
+
+    // keep all friendships except for the one with member1Id and member2Id
+    const updatedFriendships = friendships.filter((friendship) =>
+        !(friendship.member1_id === member1Id && friendship.member2_id === member2Id)
+    );
+
+    // check if nothing was removed
+    if (updatedFriendships.length == friendships.length) {
+        return res.sendStatus(400);
+    }
+
+    updateData("data/friendships.json", updatedFriendships) ? res.sendStatus(204) : res.sendStatus(400);
 });
 
 app.listen(PORT, () => {

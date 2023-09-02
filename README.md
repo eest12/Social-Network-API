@@ -11,7 +11,9 @@ An Express API.
 | GET | /member/:id/friends | Get member's friends |
 | GET | /member/:id1/friends/:id2 | Get member's friend (or empty set if the two members are not friends) |
 | POST | /register | Create new member |
+| POST | /member/:id1/befriend/:id2 | Add member as friend |
 | DELETE | /member/:id/delete | Delete member |
+| DELETE | /member/:id1/unfriend/:id2 | Remove member as friend |
 
 ## Data
 
