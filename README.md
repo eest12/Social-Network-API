@@ -1,6 +1,16 @@
 # Social Network API
 
-An Express API.
+An API to simulate a social network where members can friend each other. Uses Express and a file system for data storage.
+
+## Setup
+
+Install Node dependencies:
+
+    npm install
+
+Start server on `localhost:3000`:
+
+    npm run start
 
 ## HTTP Routes
 
@@ -43,6 +53,11 @@ An Express API.
         <td>Remove member as friend</td>
     </tr>
     <tr>
+        <td>/member/:id/feed</td>
+        <td>GET</td>
+        <td>Get member feed consisting of friends' statuses</td>
+    </tr>
+    <tr>
         <td>/register</td>
         <td>POST</td>
         <td>Create new member</td>
@@ -51,22 +66,22 @@ An Express API.
 
 ## Data
 
-The `data` directory contains two files: `members.json` and `friendships.json`. I will explain how to generate them, but the existing files can be used as they are.
+The `data` directory contains two files: `members.json` and `friendships.json`.
 
 ### Members
 
-The `members.json` file contains mock data that was generated using [Mockaroo](https://www.mockaroo.com/). It contains 50 rows and these fields (using Mockaroo's terminology):
+The `members.json` file contains mock data that was generated using [Mockaroo](https://www.mockaroo.com/). It contains 50 rows and these fields (using Mockaroo's attributes):
 
-| Field Name | Type          |
-| ---------- | ------------- |
-| id         | Row Number    |
-| username   | Username      |
-| first_name | First Name    |
-| last_name  | Last Name     |
-| email      | Email Address |
-| gender     | Gender        |
-| birthdate  | Datetime      |
-| avatar     | Avatar        |
+| Field Name | Type                       |
+| ---------- | -------------------------- |
+| id         | Row Number (Primary Key)   |
+| username   | Username                   |
+| first_name | First Name                 |
+| last_name  | Last Name                  |
+| email      | Email Address              |
+| gender     | Gender                     |
+| birthdate  | Datetime                   |
+| avatar     | Avatar                     |
 
 ### Friendships
 
