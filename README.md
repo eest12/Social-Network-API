@@ -82,6 +82,7 @@ The `members.json` file contains mock data that was generated using [Mockaroo](h
 | gender     | Gender                     |
 | birthdate  | Datetime                   |
 | avatar     | Avatar                     |
+| status     | Sentences                  |
 
 ### Friendships
 
